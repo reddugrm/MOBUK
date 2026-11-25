@@ -1,0 +1,1734 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>MOBUK – Mit Omma backen und kochen</title>
+ <!-- Tailwind CSS CDN -->
+ <script src="https://cdn.tailwindcss.com"></script>
+ <!-- Google Fonts: Inter & Playfair Display -->
+ <link rel="preconnect" href="https://fonts.googleapis.com" />
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+ <script>
+   tailwind.config = {
+     theme: {
+       extend: {
+         colors: {
+           cream: "#FAF7F2",
+           surface: "#FFFFFF",
+           soft: "#F2ECE1",
+           border: "#E5DDD0",
+           espresso: "#2C221E",
+           muted: "#72645B",
+           terracotta: "#C2593F",
+           terracottaDark: "#A4462F",
+           sage: "#4E6E58"
+         },
+         fontFamily: {
+           sans: ["Inter", "system-ui", "sans-serif"],
+           serif: ['"Playfair Display"', "Georgia", "serif"]
+         }
+       }
+     }
+   };
+ </script>
+ <style>
+   body {
+     background-color: #FAF7F2;
+     color: #2C221E;
+     font-family: "Inter", system-ui, sans-serif;
+     -webkit-tap-highlight-color: transparent;
+   }
+   .no-scrollbar::-webkit-scrollbar {
+     display: none;
+   }
+   .no-scrollbar {
+     -ms-overflow-style: none;
+     scrollbar-width: none;
+   }
+   /* Ensure closed modals never intercept clicks or touch events */
+   .modal-backdrop[data-open="false"] {
+     display: none !important;
+     pointer-events: none !important;
+   }
+   .modal-backdrop[data-open="true"] {
+     display: flex !important;
+     pointer-events: auto !important;
+   }
+ </style>
+</head>
+<body class="min-h-screen flex flex-col bg-cream text-espresso selection:bg-terracotta/20">
+
+ <!-- Sticky Top Header -->
+ <header class="sticky top-0 z-30 bg-surface/95 backdrop-blur border-b border-border shadow-xs">
+   <div class="max-w-5xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
+     <!-- Brand Button -->
+     <button type="button" data-action="go-home" class="flex items-center gap-2.5 text-left focus:outline-none min-w-0 cursor-pointer">
+       <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-terracotta text-white flex items-center justify-center shadow-xs pointer-events-none">
+         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+           <path d="M12 3c-2.5 0-4.5 2-4.5 4.5 0 1.8 1.1 3.4 2.7 4.1L9.5 20a1.5 1.5 0 0 0 1.5 1.5h2a1.5 1.5 0 0 0 1.5-1.5l-.7-8.4c1.6-.7 2.7-2.3 2.7-4.1C16.5 5 14.5 3 12 3z"/>
+         </svg>
+       </div>
+       <div class="min-w-0 pointer-events-none">
+         <div class="flex items-center gap-2 flex-wrap">
+           <span class="font-serif text-lg sm:text-xl font-bold tracking-tight leading-none">MOBUK</span>
+           <span id="totalCountBadge" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-soft text-muted border border-border">
+             11 Rezepte
+           </span>
+         </div>
+         <p class="text-[11px] text-muted hidden sm:block mt-0.5">Mit Omma backen und kochen · Familien-Sammlung</p>
+       </div>
+     </button>
+
+     <!-- Add / JSON Button -->
+     <button type="button" data-action="open-add-modal" class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-terracotta hover:bg-terracottaDark active:scale-[0.98] text-white text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer">
+       <span class="text-base leading-none font-bold pointer-events-none">+</span>
+       <span class="pointer-events-none">Rezept / JSON</span>
+     </button>
+   </div>
+
+   <!-- Primary Navigation Tabs -->
+   <nav class="max-w-5xl mx-auto px-3 sm:px-6 flex items-center gap-1 sm:gap-3 overflow-x-auto no-scrollbar border-t border-border/60">
+     <button type="button" data-action="switch-tab" data-tab="rezepte" class="nav-tab whitespace-nowrap px-3.5 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-terracotta text-terracotta cursor-pointer">
+       Rezepte
+     </button>
+     <button type="button" data-action="switch-tab" data-tab="zufall" class="nav-tab whitespace-nowrap px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-muted hover:text-espresso cursor-pointer">
+       Zufallsrezept
+     </button>
+     <button type="button" data-action="switch-tab" data-tab="stollen" class="nav-tab whitespace-nowrap inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-muted hover:text-espresso cursor-pointer">
+       <span class="pointer-events-none">Stollen-Archiv</span>
+       <span id="stollenBadgeCount" class="pointer-events-none text-[11px] px-1.5 py-0.5 rounded-full bg-soft text-terracotta font-bold">8</span>
+     </button>
+   </nav>
+ </header>
+
+ <!-- Main Content -->
+ <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6">
+
+   <!-- VIEW 1: REZEPTE -->
+   <section id="view-rezepte" class="space-y-4">
+     <div class="bg-surface rounded-2xl p-3 sm:p-4 border border-border shadow-2xs space-y-3">
+       <!-- Search Bar -->
+       <div class="relative">
+         <svg class="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+           <circle cx="11" cy="11" r="8"></circle>
+           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+         </svg>
+         <input id="searchInput" type="search" autocomplete="off" placeholder="Nach Rezepttitel oder Zutat suchen (z. B. Rouladen, Rosinen, Mehl)..." class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-cream border border-border text-sm text-espresso placeholder:text-muted focus:outline-none focus:border-terracotta" />
+         <button id="clearSearchBtn" type="button" data-action="clear-search" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg text-muted hover:text-espresso flex items-center justify-center cursor-pointer">✕</button>
+       </div>
+
+       <!-- Category Filter Pills -->
+       <div id="categoryPills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5"></div>
+     </div>
+
+     <!-- Results Count & Reset -->
+     <div class="flex items-center justify-between px-1">
+       <p id="resultsCountText" class="text-xs sm:text-sm text-muted font-medium"></p>
+       <button id="resetFilterBtn" type="button" data-action="reset-filters" class="hidden text-xs font-semibold text-terracotta hover:underline cursor-pointer">Filter zurücksetzen</button>
+     </div>
+
+     <!-- Recipes Grid -->
+     <div id="recipesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"></div>
+   </section>
+
+   <!-- VIEW 2: ZUFALLSREZEPT -->
+   <section id="view-zufall" class="hidden space-y-4">
+     <div class="bg-surface rounded-2xl p-4 sm:p-6 border border-border shadow-2xs space-y-5">
+       <div>
+         <span class="inline-block text-[11px] font-semibold uppercase tracking-wider text-terracotta bg-soft px-2.5 py-1 rounded-full">Was kochen wir heute?</span>
+         <h2 class="font-serif text-xl sm:text-2xl font-bold mt-2">Zufallsrezept aus Ommas Sammlung</h2>
+         <p class="text-xs sm:text-sm text-muted mt-1">Wähle die gewünschten Kategorien an oder ab und lass den Zufall entscheiden.</p>
+       </div>
+
+       <div class="space-y-2.5">
+         <div class="flex items-center justify-between">
+           <span class="text-xs font-semibold uppercase tracking-wider text-muted">Kategorien berücksichtigen</span>
+           <div class="flex items-center gap-2 text-xs">
+             <button type="button" data-action="random-select-all" class="text-terracotta font-semibold hover:underline cursor-pointer">Alle anwählen</button>
+             <span class="text-border">|</span>
+             <button type="button" data-action="random-select-none" class="text-muted font-medium hover:underline cursor-pointer">Alle abwählen</button>
+           </div>
+         </div>
+         <div id="randomCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2"></div>
+       </div>
+
+       <div>
+         <button type="button" data-action="draw-random" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-terracotta hover:bg-terracottaDark active:scale-[0.99] text-white font-semibold text-sm shadow-xs transition cursor-pointer">
+           <span class="pointer-events-none">🎲 Zufallsrezept ziehen</span>
+         </button>
+       </div>
+     </div>
+
+     <div id="randomResultCard"></div>
+   </section>
+
+   <!-- VIEW 3: STOLLEN-ARCHIV -->
+   <section id="view-stollen" class="hidden space-y-4">
+     <div class="bg-surface rounded-2xl p-4 sm:p-6 border border-border shadow-2xs space-y-4">
+       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+         <div>
+           <span class="inline-block text-[11px] font-semibold uppercase tracking-wider text-terracotta bg-soft px-2.5 py-1 rounded-full">Familien-Chronik · 1932–2019</span>
+           <h2 class="font-serif text-xl sm:text-2xl font-bold mt-2">Das historische Stollen-Archiv</h2>
+           <p class="text-xs sm:text-sm text-muted mt-1">Wähle ein Rezept nach Jahr aus oder vergleiche zwei Jahrzehnte direkt nebeneinander.</p>
+         </div>
+         <button id="toggleCompareBtn" type="button" data-action="toggle-compare" class="self-start sm:self-center px-4 py-2.5 rounded-xl bg-soft hover:bg-border/60 border border-border text-xs font-semibold text-espresso transition cursor-pointer">
+           Jahrgangs-Vergleich öffnen
+         </button>
+       </div>
+
+       <div class="space-y-1.5">
+         <span class="text-[11px] font-semibold uppercase tracking-wider text-muted">Jahrgang auswählen</span>
+         <div id="stollenYearPills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1"></div>
+       </div>
+     </div>
+
+     <div id="stollenMainArea"></div>
+   </section>
+
+ </main>
+
+ <!-- MODAL 1: REZEPT-DETAILANSICHT & BEARBEITUNG -->
+ <div id="detailModal" data-open="false" data-action="backdrop-close-detail" class="modal-backdrop fixed inset-0 z-40 bg-black/55 backdrop-blur-2xs items-end sm:items-center justify-center p-0 sm:p-4">
+   <div class="bg-surface w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl border border-border shadow-xl flex flex-col overflow-hidden">
+     <!-- Modal Header -->
+     <div class="px-4 sm:px-6 py-3.5 border-b border-border flex items-center justify-between gap-3 bg-soft/60">
+       <div class="min-w-0">
+         <span id="detailBadge" class="inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-terracotta/15 text-terracotta">Kategorie</span>
+         <h3 id="detailTitle" class="font-serif text-lg sm:text-2xl font-bold truncate mt-1">Rezepttitel</h3>
+       </div>
+       <button type="button" data-action="close-detail-modal" class="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center text-muted hover:text-espresso shrink-0 cursor-pointer">✕</button>
+     </div>
+
+     <!-- Modal Body -->
+     <div class="p-4 sm:p-6 overflow-y-auto space-y-5 flex-1">
+       <p id="detailNote" class="hidden text-xs sm:text-sm italic text-muted bg-cream px-3.5 py-2.5 rounded-xl border border-border"></p>
+
+       <!-- Stollen-Archiv & Jahr Zuweisung -->
+       <div class="bg-cream rounded-2xl p-3.5 border border-border flex flex-wrap items-center justify-between gap-3">
+         <label class="inline-flex items-center gap-2 text-xs sm:text-sm font-medium cursor-pointer">
+           <input id="detailStollenToggle" type="checkbox" class="w-4 h-4 accent-[#C2593F] rounded cursor-pointer" />
+           <span>Im Stollen-Archiv führen</span>
+         </label>
+         <div id="detailYearWrap" class="hidden flex items-center gap-2">
+           <label for="detailYearInput" class="text-xs font-semibold text-muted">Jahr:</label>
+           <input id="detailYearInput" type="number" min="1850" max="2100" placeholder="z. B. 1970" class="w-24 px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs font-semibold focus:outline-none focus:border-terracotta" />
+           <button type="button" data-action="save-detail-year" class="px-2.5 py-1.5 rounded-lg bg-terracotta text-white text-xs font-semibold cursor-pointer">OK</button>
+         </div>
+       </div>
+
+       <!-- Original-Zettel / Bild -->
+       <div class="bg-cream rounded-2xl p-3.5 border border-border space-y-3">
+         <div class="flex flex-wrap items-center justify-between gap-2">
+           <span class="text-xs font-semibold uppercase tracking-wider text-muted">Original-Zettel / Foto</span>
+           <div class="flex items-center gap-2">
+             <button id="togglePhotoBtn" type="button" data-action="toggle-photo-preview" class="hidden px-3 py-1.5 rounded-lg bg-surface border border-border text-xs font-semibold hover:border-terracotta cursor-pointer">
+               Originalbild anzeigen
+             </button>
+             <label class="px-3 py-1.5 rounded-lg bg-terracotta/15 text-terracotta hover:bg-terracotta/25 text-xs font-semibold cursor-pointer">
+               <span>Foto anhängen</span>
+               <input id="photoUploadInput" type="file" accept="image/*" class="hidden" />
+             </label>
+           </div>
+         </div>
+         <div id="photoPreviewBox" class="hidden">
+           <img id="detailPhotoImg" src="" alt="Originalrezept" class="w-full max-h-80 object-contain rounded-xl border border-border bg-white" />
+         </div>
+       </div>
+
+       <!-- Portions / Stollen Scaler -->
+       <div class="bg-soft rounded-2xl p-3.5 border border-border flex items-center justify-between gap-3">
+         <div>
+           <span class="text-xs font-semibold uppercase tracking-wider text-muted block">Personen / Menge anpassen</span>
+           <span id="detailBaseHint" class="text-[11px] text-muted">Basis: 4 Portionen</span>
+         </div>
+         <div class="flex items-center gap-2 bg-surface px-2 py-1.5 rounded-xl border border-border">
+           <button type="button" data-action="dec-servings" class="w-9 h-9 rounded-lg bg-soft hover:bg-border/70 font-bold text-base flex items-center justify-center cursor-pointer">−</button>
+           <span id="detailServingsVal" class="min-w-[3rem] text-center font-bold text-sm sm:text-base">4</span>
+           <button type="button" data-action="inc-servings" class="w-9 h-9 rounded-lg bg-soft hover:bg-border/70 font-bold text-base flex items-center justify-center cursor-pointer">+</button>
+         </div>
+       </div>
+
+       <!-- Ingredients List -->
+       <div class="space-y-2">
+         <h4 class="font-serif text-base sm:text-lg font-bold">Zutaten</h4>
+         <ul id="detailIngredientsList" class="divide-y divide-border/70 bg-cream rounded-2xl px-4 py-1 border border-border text-sm"></ul>
+       </div>
+
+       <!-- Instructions -->
+       <div class="space-y-2">
+         <h4 class="font-serif text-base sm:text-lg font-bold">Zubereitung</h4>
+         <p id="detailInstructions" class="text-sm leading-relaxed bg-cream p-4 rounded-2xl border border-border whitespace-pre-line"></p>
+       </div>
+     </div>
+
+     <!-- Modal Footer -->
+     <div class="px-4 sm:px-6 py-3 border-t border-border bg-soft/40 flex items-center justify-between gap-2">
+       <div>
+         <button id="askDeleteBtn" type="button" data-action="ask-delete" class="px-3 py-2 rounded-xl text-xs font-semibold text-red-700 hover:bg-red-50 cursor-pointer">Löschen</button>
+         <div id="confirmDeleteBox" class="hidden inline-flex items-center gap-1.5">
+           <button type="button" data-action="confirm-delete-yes" class="px-3 py-1.5 rounded-lg bg-red-700 text-white text-xs font-semibold cursor-pointer">Ja, löschen</button>
+           <button type="button" data-action="confirm-delete-no" class="px-2.5 py-1.5 rounded-lg bg-soft text-xs font-semibold cursor-pointer">Nein</button>
+         </div>
+       </div>
+       <button type="button" data-action="close-detail-modal" class="px-5 py-2.5 rounded-xl bg-espresso text-white text-xs sm:text-sm font-semibold cursor-pointer">Fertig</button>
+     </div>
+   </div>
+ </div>
+
+ <!-- MODAL 2: REZEPT HINZUFÜGEN / JSON IMPORT & EXPORT -->
+ <div id="addModal" data-open="false" data-action="backdrop-close-add" class="modal-backdrop fixed inset-0 z-40 bg-black/55 backdrop-blur-2xs items-end sm:items-center justify-center p-0 sm:p-4">
+   <div class="bg-surface w-full sm:max-w-xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl border border-border shadow-xl flex flex-col overflow-hidden">
+     <div class="px-4 sm:px-6 py-3.5 border-b border-border flex items-center justify-between bg-soft/60">
+       <h3 class="font-serif text-lg sm:text-xl font-bold">Rezept / JSON verwalten</h3>
+       <button type="button" data-action="close-add-modal" class="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center text-muted hover:text-espresso cursor-pointer">✕</button>
+     </div>
+
+     <!-- Sub-Navigation -->
+     <div class="px-4 sm:px-6 pt-2 flex gap-2 border-b border-border bg-cream">
+       <button type="button" data-action="switch-subtab" data-subtab="manual" class="subtab-btn px-3.5 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-terracotta text-terracotta cursor-pointer">Einzelnes Rezept</button>
+       <button type="button" data-action="switch-subtab" data-subtab="json" class="subtab-btn px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-muted hover:text-espresso cursor-pointer">JSON-Import & Export</button>
+     </div>
+
+     <!-- Manual Recipe Form -->
+     <form id="manualForm" class="p-4 sm:p-6 overflow-y-auto space-y-3.5 flex-1">
+       <div>
+         <label class="block text-xs font-semibold text-muted mb-1">Rezepttitel *</label>
+         <input id="inpTitle" type="text" required placeholder="z. B. Ommas Spritzgebäck" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-border text-sm focus:outline-none focus:border-terracotta" />
+       </div>
+       <div class="grid grid-cols-2 gap-3">
+         <div>
+           <label class="block text-xs font-semibold text-muted mb-1">Kategorie</label>
+           <select id="inpCategory" class="w-full px-3 py-2.5 rounded-xl bg-cream border border-border text-sm focus:outline-none focus:border-terracotta"></select>
+         </div>
+         <div>
+           <label class="block text-xs font-semibold text-muted mb-1">Portionen / Stück</label>
+           <input id="inpServings" type="number" min="1" max="100" value="4" class="w-full px-3 py-2.5 rounded-xl bg-cream border border-border text-sm focus:outline-none focus:border-terracotta" />
+         </div>
+       </div>
+       <div id="inpYearWrap" class="hidden">
+         <label class="block text-xs font-semibold text-muted mb-1">Stollen-Jahrgang</label>
+         <input id="inpYear" type="number" min="1850" max="2100" placeholder="z. B. 1978" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-border text-sm focus:outline-none focus:border-terracotta" />
+       </div>
+       <div>
+         <label class="block text-xs font-semibold text-muted mb-1">Notiz / Quelle (optional)</label>
+         <input id="inpNote" type="text" placeholder="z. B. Zeitungsausschnitt von 1974" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-border text-sm focus:outline-none focus:border-terracotta" />
+       </div>
+       <div>
+         <label class="block text-xs font-semibold text-muted mb-1">Zutaten (eine pro Zeile, Menge vorne) *</label>
+         <textarea id="inpIngredients" rows="5" required placeholder="500 g Mehl 250 g Butter 150 g Zucker 2 Stk. Eier" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-border text-sm focus:outline-none focus:border-terracotta"></textarea>
+       </div>
+       <div>
+         <label class="block text-xs font-semibold text-muted mb-1">Zubereitung *</label>
+         <textarea id="inpInstructions" rows="4" required placeholder="Alle Zutaten zu einem Teig verkneten..." class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-border text-sm focus:outline-none focus:border-terracotta"></textarea>
+       </div>
+       <div class="pt-2 flex justify-end gap-2 border-t border-border">
+         <button type="button" data-action="close-add-modal" class="px-4 py-2.5 rounded-xl bg-soft text-sm font-semibold cursor-pointer">Abbrechen</button>
+         <button type="submit" class="px-5 py-2.5 rounded-xl bg-terracotta hover:bg-terracottaDark text-white text-sm font-semibold cursor-pointer">Speichern</button>
+       </div>
+     </form>
+
+     <!-- JSON Import & Export Panel -->
+     <div id="jsonPanel" class="hidden p-4 sm:p-6 overflow-y-auto space-y-3.5 flex-1">
+       <p class="text-xs text-muted leading-relaxed">
+         Füge hier den JSON-Block aus dem Chat ein, um mehrere Rezepte auf einmal zu importieren. Unterstützt Zutaten als Textzeilen (<code>"500 g Mehl"</code>) und als Objekte (<code>{"amount":500,"unit":"g","name":"Mehl"}</code>).
+       </p>
+       <textarea id="jsonTextarea" rows="8" placeholder='[ { "title": "...", "category": "Kuchen", "servings": 4, "ingredients": [...], "instructions": "..." } ]' class="w-full p-3 rounded-xl bg-cream border border-border font-mono text-xs focus:outline-none focus:border-terracotta"></textarea>
+       <p id="jsonErrorMsg" class="hidden text-xs text-red-700 font-medium bg-red-50 p-2.5 rounded-xl border border-red-200"></p>
+       <div class="pt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border">
+         <button type="button" data-action="export-all-json" class="px-3.5 py-2.5 rounded-xl bg-soft hover:bg-border/60 text-xs font-semibold text-espresso cursor-pointer">Alle als JSON exportieren</button>
+         <div class="flex items-center gap-2">
+           <button type="button" data-action="close-add-modal" class="px-3.5 py-2.5 rounded-xl bg-soft text-xs sm:text-sm font-semibold cursor-pointer">Abbrechen</button>
+           <button type="button" data-action="import-json" class="px-4 py-2.5 rounded-xl bg-terracotta hover:bg-terracottaDark text-white text-xs sm:text-sm font-semibold cursor-pointer">Importieren</button>
+         </div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- TOAST MESSAGE -->
+ <div id="toastBox" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md pointer-events-none">
+   <div id="toastInner" class="rounded-2xl px-4 py-3 shadow-lg text-xs sm:text-sm font-medium bg-espresso text-white text-center"></div>
+ </div>
+
+ <!-- CLEAN VANILLA JS WITH CENTRALIZED EVENT DELEGATION -->
+ <script>
+   (function () {
+     "use strict";
+
+     var STORAGE_KEY = "mobuk_family_recipes_v3";
+
+     var CATEGORIES = [
+       "Vorspeise",
+       "Saucen",
+       "Salate",
+       "Suppen",
+       "Aufläufe",
+       "Fisch",
+       "Fleisch",
+       "Kuchen",
+       "Dessert",
+       "Stollen-Archiv"
+     ];
+
+     var REGULAR_CATEGORIES = [
+       "Vorspeise",
+       "Saucen",
+       "Salate",
+       "Suppen",
+       "Aufläufe",
+       "Fisch",
+       "Fleisch",
+       "Kuchen",
+       "Dessert"
+     ];
+
+     // Pre-loaded: All 8 transcribed historical Stollen recipes + 3 sample regular recipes
+     var STARTER_RECIPES = [
+       {
+         id: "stollen-1932",
+         title: "Weihnachtsstollen 1932 (Original)",
+         category: "Stollen-Archiv",
+         year: 1932,
+         servings: 8,
+         isStollen: true,
+         note: "Historisches Familienrezept (damalige Gesamtkosten inkl. 3,91 RM Backgeld für den Bäcker)",
+         ingredients: [
+           "7500 g Mehl (15 Pfund)",
+           "1000 g Butter (2 Pfund)",
+           "1250 g Margarine (2,5 Pfund)",
+           "750 g Talg (1,5 Pfund)",
+           "1500 g Zucker (3 Pfund)",
+           "2250 g Sultaninen (4,5 Pfund)",
+           "250 g süße Mandeln (0,5 Pfund)",
+           "250 g bittere Mandeln (0,5 Pfund)",
+           "625 g Hefe (1,25 Pfund)",
+           "1500 ml Milch (3 Kannen / 1,5 l)",
+           "4 Pck. Vanillezucker",
+           "4 Stk. Zitronen",
+           "100 g Salz",
+           "312.5 g Butter zum Bestreichen (1,25 Stück)",
+           "500 g Staubzucker (1 Pfund)"
+         ],
+         instructions: "Historisches Familienrezept von 1932. Alle Zutaten zu einem schweren Hefeteig verarbeiten, gehen lassen, Stollen formen, backen und anschließend reichlich mit flüssiger Butter bestreichen und mit Staubzucker bezuckern."
+       },
+       {
+         id: "stollen-1969",
+         title: "Stollen 1969",
+         category: "Stollen-Archiv",
+         year: 1969,
+         servings: 6,
+         isStollen: true,
+         note: "Rezeptnotiz von 1969 (Gesamtpreis der Zutaten damals 65,91 M)",
+         ingredients: [
+           "5000 g Mehl (10 Pfund)",
+           "3000 g Rosinen (6 Pfund)",
+           "1250 g Zucker (2,5 Pfund)",
+           "2000 g Butter (4 Pfund)",
+           "175 g bittere Mandeln (150–200 g)",
+           "250 g süße Mandeln (0,5 Pfund)",
+           "500 g Hefe (1 Pfund)",
+           "2000 ml Milch (2 l)",
+           "4 Pck. Vanillezucker",
+           "4 Stk. Zitronen",
+           "50 g Salz",
+           "250 g Butter zum Bestreichen (1 Stück)",
+           "500 g Staubzucker (1 Pfund)"
+         ],
+         instructions: "Rezeptnotiz von 1969. Aus den Zutaten einen schweren Hefeteig kneten, gut gehen lassen, backen und heiß mit der restlichen Butter bestreichen und mit Staubzucker bestreuen."
+       },
+       {
+         id: "stollen-1970",
+         title: "Stollen 1970 (DDR-Rezept)",
+         category: "Stollen-Archiv",
+         year: 1970,
+         servings: 6,
+         isStollen: true,
+         note: "Notiert auf einem VLV-Freiberg-Formular von 1970 (47,05 M)",
+         ingredients: [
+           "6000 g Mehl (12 Pfund)",
+           "4000 g Rosinen (8 Pfund)",
+           "250 g süße Mandeln (0,5 Pfund)",
+           "250 g bittere Mandeln (0,5 Pfund)",
+           "1250 g Zucker (2,5 Pfund)",
+           "1000 g Schmelzmargarine (2 Pfund)",
+           "500 g Schmelzbutter (1 Pfund)",
+           "750 g Butter (1,5 Pfund)",
+           "500 g Fett / Schmalz (1 Pfund)",
+           "5 Stk. Zitronen",
+           "1000 g Hefe (2 Pfund)",
+           "5 Pck. Vanillezucker",
+           "50 g Salz",
+           "1000 ml Milch (1 l)",
+           "500 g Staubzucker (1 Pfund)",
+           "750 g Butter zum Bestreichen (3 Stück)"
+         ],
+         instructions: "Vorteig mit Milch und Hefe ansetzen, mit Mehl, den verschiedenen Fetten, Zucker, Gewürzen, Mandeln und Rosinen verkneten. Nach dem Backen mit 3 Stück Butter bestreichen und mit 1 Pfund Staubzucker bedecken."
+       },
+       {
+         id: "stollen-1975",
+         title: "Stollenrezept (2-Kilo-Stollen-Variante)",
+         category: "Stollen-Archiv",
+         year: 1975,
+         servings: 6,
+         isStollen: true,
+         note: "Ergibt ca. 6 Stollen à 2 Kilo (Gesamtfett im Teig 6,5 Pfund)",
+         ingredients: [
+           "6000 g Mehl (12 Pfund)",
+           "4000 g Rosinen (8 Pfund)",
+           "250 g süße Mandeln (0,5 Pfund)",
+           "250 g bittere Mandeln (0,5 Pfund)",
+           "1250 g Zucker (2,5 Pfund)",
+           "1000 g Schmelzmargarine (2 Pfund)",
+           "500 g Schmelzbutter (1 Pfund)",
+           "1250 g Butter (2,5 Pfund)",
+           "500 g Fett (1 Pfund)",
+           "5 Stk. Zitronen",
+           "1000 g Hefe (2 Pfund)",
+           "5 Pck. Vanillezucker",
+           "1000 ml Milch (1 l)",
+           "65 g Salz",
+           "500 g Staubzucker (1 Pfund)",
+           "750 g Butter zum Bestreichen (3 Stück)"
+         ],
+         instructions: "Ergibt ca. 6 Stollen à 2 Kilo. Teig gründlich durchkneten, ausreichend Ruhezeit einhalten, backen und anschließend mit 3 Stück Butter bestreichen und mit Staubzucker einhüllen."
+       },
+       {
+         id: "stollen-1985",
+         title: "Stollen (Kleine Haushaltsmenge)",
+         category: "Stollen-Archiv",
+         year: 1985,
+         servings: 3,
+         isStollen: true,
+         note: "Kompaktere Variante mit 5 Pfund Mehl und 400 ccm Milch",
+         ingredients: [
+           "2500 g Mehl (5 Pfund)",
+           "1600 g Rosinen (3,2 Pfund)",
+           "200 g süße Mandeln",
+           "150 g bittere Mandeln",
+           "500 g Zucker",
+           "400 g Margarine",
+           "200 g Schmelzbutter",
+           "500 g Butter",
+           "200 g Schmalz",
+           "2 Stk. Zitronen",
+           "400 g Hefe",
+           "4 Pck. Vanillezucker",
+           "30 g Salz",
+           "400 ml Milch (400 ccm)"
+         ],
+         instructions: "Aus Milch, Hefe und etwas Zucker einen Vorteig bereiten, mit Mehl und allen übrigen Zutaten zu einem geschmeidigen Stollenteig verkneten, gehen lassen und goldbraun backen."
+       },
+       {
+         id: "stollen-2015",
+         title: "Stollen 2015 (6 à 2 kg)",
+         category: "Stollen-Archiv",
+         year: 2015,
+         servings: 6,
+         isStollen: true,
+         note: "Ergibt 6 Stollen à 2 kg mit in Jamaika-Rum eingelegten Rosinen",
+         ingredients: [
+           "4000 g Mehl",
+           "3350 g Rosinen + Sultaninen (in Jamaika-Rum eingelegt)",
+           "360 g süße Mandeln",
+           "750 g Zucker",
+           "600 g Margarine / Sanella",
+           "333 g Butterschmalz",
+           "750 g Butter",
+           "333 g Schweineschmalz",
+           "4 Stk. Zitronen",
+           "55 g Salz",
+           "2 Pck. Zitronat",
+           "4 Pck. Vanillezucker",
+           "700 g Hefe",
+           "700 g Milch",
+           "1 Fläschchen Bittermandel-Aroma",
+           "1 Schuss Jamaika-Rum (für die Rosinen)"
+         ],
+         instructions: "Rosinen rechtzeitig in Jamaika-Rum einweichen. Hefeteig mit Butter, Butterschmalz, Schweineschmalz und Sanella verkneten, gehen lassen, zu 6 Stollen formen und backen."
+       },
+       {
+         id: "stollen-2017",
+         title: "Stollen 2017 (6–7 à 2 kg)",
+         category: "Stollen-Archiv",
+         year: 2017,
+         servings: 6,
+         isStollen: true,
+         note: "Weiterentwicklung von 2017 (60 Pfund Gesamtgewicht, Mehl auf 3600 g reduziert)",
+         ingredients: [
+           "3600 g Mehl",
+           "3350 g Rosinen",
+           "360 g süße Mandeln",
+           "750 g Zucker",
+           "600 g Margarine / Sanella",
+           "300 g Butterschmalz",
+           "750 g Butter",
+           "300 g Schmalz / Fett",
+           "3.5 Stk. Zitronen (Saft & Schale)",
+           "55 g Salz",
+           "2 Pck. Zitronat",
+           "4 Pck. Vanillezucker",
+           "700 g Hefe",
+           "700 g Milch",
+           "1 Fläschchen Bittermandel-Aroma",
+           "1 Schuss Jamaika-Rum"
+         ],
+         instructions: "Alle Zutaten zu einem schweren Hefeteig verarbeiten, gehen lassen, zu 6 bis 7 Stollen à 2 Kilo formen und goldbraun backen."
+       },
+       {
+         id: "stollen-2019",
+         title: "Stollen 2019 (3 à 2 kg)",
+         category: "Stollen-Archiv",
+         year: 2019,
+         servings: 3,
+         isStollen: true,
+         note: "Halbierte Rezeptmenge von 2019 für exakt 3 Stollen à 2 Kilo",
+         ingredients: [
+           "1800 g Mehl",
+           "1675 g Rosinen / Sultaninen (in Rum eingelegt)",
+           "180 g süße Mandeln",
+           "380 g Zucker",
+           "330 g Sanella",
+           "170 g Butterschmalz",
+           "420 g Butter",
+           "170 g Schmalz",
+           "25 g Salz",
+           "2 Stk. Zitronen",
+           "1.5 Pck. Zitronat",
+           "2 Pck. Vanillezucker",
+           "335 g Hefe",
+           "335 g Milch",
+           "1 Schuss Rum"
+         ],
+         instructions: "Rosinen in Rum einweichen, Vorteig aus Hefe und Milch ansetzen, alle Zutaten verkneten, ruhen lassen und zu 3 Stollen à 2 Kilo backen."
+       },
+       {
+         id: "sample-fleisch-rouladen",
+         title: "Omas Rinderrouladen",
+         category: "Fleisch",
+         year: null,
+         servings: 4,
+         isStollen: false,
+         note: "Klassisches Sonntagsgericht mit Speck, Zwiebeln und Gewürzgurke",
+         ingredients: [
+           "4 Stk. Rinderrouladen (à ca. 180 g)",
+           "4 TL mittelscharfer Senf",
+           "100 g durchwachsener Speck",
+           "2 Stk. Zwiebeln",
+           "4 Stk. Gewürzgurken",
+           "2 EL Butterschmalz",
+           "500 ml Rinderbrühe",
+           "1 EL Tomatenmark"
+         ],
+         instructions: "Rouladen flach klopfen, salzen, pfeffern und mit Senf bestreichen. Mit Speck, Zwiebelstreifen und Gurkenstiften belegen, fest aufrollen und mit Rouladennadeln fixieren. In heißem Butterschmalz rundherum scharf anbraten, Tomatenmark mitrösten, mit Brühe ablöschen und zugedeckt ca. 90 Minuten schmoren."
+       },
+       {
+         id: "sample-kuchen-apfel",
+         title: "Klassischer Apfelkuchen",
+         category: "Kuchen",
+         year: null,
+         servings: 8,
+         isStollen: false,
+         note: "Saftiger Sonntagskuchen aus der Springform",
+         ingredients: [
+           "250 g Weizenmehl",
+           "125 g kalte Butter",
+           "100 g Zucker",
+           "1 Stk. Ei",
+           "1 Pck. Vanillezucker",
+           "0.5 Pck. Backpulver",
+           "750 g säuerliche Äpfel",
+           "1 TL Zimt"
+         ],
+         instructions: "Mehl, kalte Butterflöckchen, Zucker, Ei, Vanillezucker und Backpulver rasch zu einem glatten Mürbeteig verkneten und 30 Minuten kalt stellen. Teig in eine gefettete Springform drücken, geschälte Apfelspalten dicht auflegen, mit Zimt bestreuen und bei 180 °C Ober-/Unterhitze ca. 40 Minuten backen."
+       },
+       {
+         id: "sample-suppen-kartoffel",
+         title: "Herzhafte Kartoffelsuppe",
+         category: "Suppen",
+         year: null,
+         servings: 4,
+         isStollen: false,
+         note: "Cremig gestampft mit Suppengrün und Majoran",
+         ingredients: [
+           "1000 g mehligkochende Kartoffeln",
+           "1 Bund Suppengrün (Möhren, Sellerie, Lauch)",
+           "1 Stk. Zwiebel",
+           "1 EL Butter",
+           "1000 ml Gemüse- oder Fleischbrühe",
+           "1 TL getrockneter Majoran",
+           "4 Stk. Wiener Würstchen (optional)"
+         ],
+         instructions: "Kartoffeln und Suppengrün schälen und klein würfeln. Zwiebel in Butter glasig dünsten, Gemüse kurz mitschwitzen und mit Brühe aufgießen. 20 Minuten weich kochen, teilweise stampfen, mit Majoran, Salz und Pfeffer abschmecken und nach Wunsch mit geschnittenen Wiener Würstchen servieren."
+       }
+     ];
+
+     // Storage helpers
+     function loadRecipes() {
+       try {
+         var raw = window.localStorage.getItem(STORAGE_KEY);
+         if (raw) {
+           var parsed = JSON.parse(raw);
+           if (Array.isArray(parsed) && parsed.length > 0) {
+             return parsed;
+           }
+         }
+       } catch (err) {
+         // Fallback to starter recipes
+       }
+       return STARTER_RECIPES.slice();
+     }
+
+     function saveRecipes(list) {
+       try {
+         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+       } catch (err) {
+         // Ignore quota errors if very large photo is uploaded
+       }
+     }
+
+     // Application State
+     var state = {
+       recipes: loadRecipes(),
+       activeTab: "rezepte",
+       selectedCategory: "Alle",
+       searchQuery: "",
+       activeRecipeId: null,
+       servingMap: {},
+       showPhoto: false,
+       randomCats: REGULAR_CATEGORIES.slice(),
+       randomPickId: null,
+       selectedStollenYear: 1932,
+       compareMode: false,
+       compareYears: [1932, 2019]
+     };
+
+     saveRecipes(state.recipes);
+
+     // Utility functions
+     function escapeHtml(str) {
+       return String(str || "")
+         .replace(/&/g, "&")
+         .replace(/</g, "<")
+         .replace(/>/g, ">")
+         .replace(/"/g, """)
+         .replace(/'/g, "'");
+     }
+
+     var toastTimer = null;
+     function showToast(msg) {
+       var box = document.getElementById("toastBox");
+       var inner = document.getElementById("toastInner");
+       if (!box || !inner) return;
+       inner.textContent = msg;
+       box.classList.remove("hidden");
+       if (toastTimer) clearTimeout(toastTimer);
+       toastTimer = setTimeout(function () {
+         box.classList.add("hidden");
+       }, 3000);
+     }
+
+     function parseIngredient(item) {
+       if (item && typeof item === "object") {
+         return {
+           amount: typeof item.amount === "number" ? item.amount : null,
+           unit: item.unit || "",
+           name: item.name || ""
+         };
+       }
+       var line = String(item || "").trim();
+       var match = line.match(/^(\d+(?:[.,]\d+)?|\d+\s*\/\s*\d+)\s*(.*)$/);
+       if (!match) {
+         return { amount: null, unit: "", name: line };
+       }
+       var rawNum = match[1].replace(",", ".").trim();
+       var amount = null;
+       if (rawNum.indexOf("/") !== -1) {
+         var parts = rawNum.split("/");
+         var den = parseFloat(parts[1]);
+         if (den) amount = parseFloat(parts[0]) / den;
+       } else {
+         amount = parseFloat(rawNum);
+       }
+       var rest = match[2].trim();
+       var knownUnits = [
+         "g", "gr", "kg", "ml", "l", "ccm", "dl", "cl",
+         "EL", "TL", "Pck.", "Pck", "Stk.", "Stk", "Stück",
+         "Bund", "Dose", "Dosen", "Fläschchen", "Schuss",
+         "Prise", "Prisen", "Tasse", "Tassen", "Pfund", "Kannen"
+       ];
+       var tokens = rest.split(/\s+/);
+       if (tokens.length > 1 && knownUnits.indexOf(tokens[0]) !== -1) {
+         return {
+           amount: isNaN(amount) ? null : amount,
+           unit: tokens[0],
+           name: tokens.slice(1).join(" ")
+         };
+       }
+       return {
+         amount: isNaN(amount) ? null : amount,
+         unit: "",
+         name: rest
+       };
+     }
+
+     function formatScaledAmount(amount, factor) {
+       if (amount === null || isNaN(amount)) return "";
+       var val = amount * factor;
+       if (val >= 100) return String(Math.round(val));
+       if (val >= 10) return String(Math.round(val * 10) / 10).replace(".", ",");
+       return String(Math.round(val * 100) / 100).replace(".", ",");
+     }
+
+     function extractYear(recipe) {
+       if (recipe.year && !isNaN(Number(recipe.year))) return Number(recipe.year);
+       var match = String(recipe.title || "").match(/\b(18\d{2}|19\d{2}|20\d{2})\b/);
+       return match ? Number(match[1]) : null;
+     }
+
+     function isStollenRecipe(recipe) {
+       return (
+         recipe.isStollen === true ||
+         recipe.category === "Stollen-Archiv" ||
+         String(recipe.title || "").toLowerCase().indexOf("stollen") !== -1
+       );
+     }
+
+     function getStollenList() {
+       return state.recipes
+         .filter(isStollenRecipe)
+         .map(function (r) {
+           return Object.assign({}, r, { resolvedYear: extractYear(r) || 1950 });
+         })
+         .sort(function (a, b) {
+           return a.resolvedYear - b.resolvedYear;
+         });
+     }
+
+     function getRecipeById(id) {
+       for (var i = 0; i < state.recipes.length; i++) {
+         if (state.recipes[i].id === id) return state.recipes[i];
+       }
+       return null;
+     }
+
+     // Render Functions
+     function updateHeaderBadges() {
+       var totalBadge = document.getElementById("totalCountBadge");
+       if (totalBadge) totalBadge.textContent = state.recipes.length + " Rezepte";
+       var stollenCount = getStollenList().length;
+       var stollenBadge = document.getElementById("stollenBadgeCount");
+       if (stollenBadge) stollenBadge.textContent = String(stollenCount);
+     }
+
+     function renderTabs() {
+       var tabButtons = document.querySelectorAll(".nav-tab");
+       for (var i = 0; i < tabButtons.length; i++) {
+         var btn = tabButtons[i];
+         var tab = btn.getAttribute("data-tab");
+         var active = tab === state.activeTab;
+         btn.className =
+           "nav-tab whitespace-nowrap inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm cursor-pointer border-b-2 " +
+           (active
+             ? "border-terracotta text-terracotta font-semibold"
+             : "border-transparent text-muted hover:text-espresso font-medium");
+       }
+
+       document.getElementById("view-rezepte").classList.toggle("hidden", state.activeTab !== "rezepte");
+       document.getElementById("view-zufall").classList.toggle("hidden", state.activeTab !== "zufall");
+       document.getElementById("view-stollen").classList.toggle("hidden", state.activeTab !== "stollen");
+     }
+
+     function renderCategoryPills() {
+       var container = document.getElementById("categoryPills");
+       var allCats = ["Alle"].concat(CATEGORIES);
+       var html = "";
+       for (var i = 0; i < allCats.length; i++) {
+         var cat = allCats[i];
+         var active = state.selectedCategory === cat;
+         html +=
+           '<button type="button" data-action="select-category" data-category="' +
+           escapeHtml(cat) +
+           '" class="whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold border transition cursor-pointer ' +
+           (active
+             ? "bg-terracotta text-white border-terracotta shadow-2xs"
+             : "bg-cream text-espresso border-border hover:border-terracotta/60") +
+           '">' +
+           escapeHtml(cat) +
+           "</button>";
+       }
+       container.innerHTML = html;
+     }
+
+     function renderRecipeCardHtml(recipe) {
+       var stollen = isStollenRecipe(recipe);
+       var yr = extractYear(recipe);
+       var badgeLabel = stollen && yr ? "Stollen · " + yr : recipe.category;
+       var unitLabel = stollen ? "Stollen" : "Portionen";
+       var hasPhoto = Boolean(recipe.photoDataUrl);
+       var ingPreview = (recipe.ingredients || [])
+         .slice(0, 3)
+         .map(function (ing) {
+           return typeof ing === "object" ? ing.name : String(ing);
+         })
+         .join(" · ");
+
+       return (
+         '<article data-action="open-recipe" data-id="' +
+         escapeHtml(recipe.id) +
+         '" class="bg-surface rounded-2xl p-4 border border-border hover:border-terracotta/70 shadow-2xs hover:shadow-md transition cursor-pointer flex flex-col justify-between gap-3">' +
+         '<div class="space-y-2 pointer-events-none">' +
+         '<div class="flex items-center justify-between gap-2">' +
+         '<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-soft text-terracotta">' +
+         escapeHtml(badgeLabel) +
+         "</span>" +
+         (hasPhoto
+           ? '<span class="text-[11px] font-medium text-sage bg-sage/10 px-2 py-0.5 rounded-full">📷 Originalfoto</span>'
+           : "") +
+         "</div>" +
+         '<h3 class="font-serif text-base sm:text-lg font-bold leading-snug text-espresso">' +
+         escapeHtml(recipe.title) +
+         "</h3>" +
+         '<p class="text-xs text-muted line-clamp-2">' +
+         escapeHtml(ingPreview) +
+         "</p>" +
+         "</div>" +
+         '<div class="pt-2.5 border-t border-border/60 flex items-center justify-between text-xs text-muted pointer-events-none">' +
+         "<span>Basis: " +
+         escapeHtml(recipe.servings || 4) +
+         " " +
+         unitLabel +
+         "</span>" +
+         '<span class="font-semibold text-terracotta">Öffnen →</span>' +
+         "</div>" +
+         "</article>"
+       );
+     }
+
+     function renderRecipesView() {
+       renderCategoryPills();
+
+       var q = state.searchQuery.trim().toLowerCase();
+       var clearBtn = document.getElementById("clearSearchBtn");
+       clearBtn.classList.toggle("hidden", !q);
+
+       var filtered = state.recipes.filter(function (r) {
+         var matchesCat =
+           state.selectedCategory === "Alle" ||
+           (state.selectedCategory === "Stollen-Archiv" && isStollenRecipe(r)) ||
+           r.category === state.selectedCategory;
+
+         if (!matchesCat) return false;
+         if (!q) return true;
+
+         var titleHit = String(r.title || "").toLowerCase().indexOf(q) !== -1;
+         var noteHit = String(r.note || "").toLowerCase().indexOf(q) !== -1;
+         var ingHit = (r.ingredients || []).some(function (ing) {
+           var txt = typeof ing === "object" ? ing.name : String(ing);
+           return txt.toLowerCase().indexOf(q) !== -1;
+         });
+         return titleHit || noteHit || ingHit;
+       });
+
+       var countText = document.getElementById("resultsCountText");
+       countText.textContent =
+         filtered.length + (filtered.length === 1 ? " Rezept gefunden" : " Rezepte gefunden");
+
+       var resetBtn = document.getElementById("resetFilterBtn");
+       resetBtn.classList.toggle("hidden", state.selectedCategory === "Alle" && !q);
+
+       var grid = document.getElementById("recipesGrid");
+       if (filtered.length === 0) {
+         grid.innerHTML =
+           '<div class="col-span-full bg-surface rounded-2xl p-8 border border-border text-center space-y-2">' +
+           '<p class="font-serif text-lg font-bold">Keine passenden Rezepte gefunden</p>' +
+           '<p class="text-xs sm:text-sm text-muted">Passe den Suchbegriff an oder wähle eine andere Kategorie.</p>' +
+           "</div>";
+         return;
+       }
+
+       var cardsHtml = "";
+       for (var i = 0; i < filtered.length; i++) {
+         cardsHtml += renderRecipeCardHtml(filtered[i]);
+       }
+       grid.innerHTML = cardsHtml;
+     }
+
+     function renderRandomView() {
+       var boxWrap = document.getElementById("randomCheckboxes");
+       var html = "";
+       for (var i = 0; i < CATEGORIES.length; i++) {
+         var cat = CATEGORIES[i];
+         var checked = state.randomCats.indexOf(cat) !== -1;
+         html +=
+           '<label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-medium cursor-pointer transition ' +
+           (checked ? "bg-soft border-terracotta/50 text-espresso" : "bg-cream border-border text-muted") +
+           '">' +
+           '<input type="checkbox" data-action="toggle-random-cat" data-category="' +
+           escapeHtml(cat) +
+           '" ' +
+           (checked ? "checked" : "") +
+           ' class="w-4 h-4 accent-[#C2593F] rounded cursor-pointer" />' +
+           '<span class="truncate">' +
+           escapeHtml(cat) +
+           "</span>" +
+           "</label>";
+       }
+       boxWrap.innerHTML = html;
+
+       var resContainer = document.getElementById("randomResultCard");
+       if (!state.randomPickId) {
+         resContainer.innerHTML = "";
+         return;
+       }
+       var picked = getRecipeById(state.randomPickId);
+       if (!picked) {
+         resContainer.innerHTML = "";
+         return;
+       }
+       resContainer.innerHTML =
+         '<div class="space-y-2">' +
+         '<p class="text-xs font-semibold uppercase tracking-wider text-sage px-1">Unser Vorschlag für dich:</p>' +
+         renderRecipeCardHtml(picked) +
+         "</div>";
+     }
+
+     function renderStollenView() {
+       var stollenList = getStollenList();
+       var compareBtn = document.getElementById("toggleCompareBtn");
+       compareBtn.textContent = state.compareMode
+         ? "Einzelansicht anzeigen"
+         : "Jahrgangs-Vergleich öffnen";
+
+       // Ensure valid selected year
+       if (stollenList.length > 0) {
+         var exists = stollenList.some(function (s) {
+           return s.resolvedYear === state.selectedStollenYear;
+         });
+         if (!exists) state.selectedStollenYear = stollenList[0].resolvedYear;
+       }
+
+       // Year Selector Pills
+       var pillsContainer = document.getElementById("stollenYearPills");
+       var pillsHtml = "";
+       for (var i = 0; i < stollenList.length; i++) {
+         var item = stollenList[i];
+         var active = !state.compareMode && item.resolvedYear === state.selectedStollenYear;
+         pillsHtml +=
+           '<button type="button" data-action="select-stollen-year" data-year="' +
+           item.resolvedYear +
+           '" class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border transition cursor-pointer ' +
+           (active
+             ? "bg-terracotta text-white border-terracotta shadow-2xs"
+             : "bg-cream text-espresso border-border hover:border-terracotta") +
+           '">' +
+           item.resolvedYear +
+           "</button>";
+       }
+       pillsContainer.innerHTML = pillsHtml;
+
+       var mainArea = document.getElementById("stollenMainArea");
+       if (stollenList.length === 0) {
+         mainArea.innerHTML =
+           '<div class="bg-surface rounded-2xl p-6 border border-border text-center text-sm text-muted">Noch keine Stollen-Rezepte vorhanden.</div>';
+         return;
+       }
+
+       if (!state.compareMode) {
+         var selectedRecipe = stollenList[0];
+         for (var j = 0; j < stollenList.length; j++) {
+           if (stollenList[j].resolvedYear === state.selectedStollenYear) {
+             selectedRecipe = stollenList[j];
+             break;
+           }
+         }
+
+         var ingsHtml = (selectedRecipe.ingredients || [])
+           .map(function (ing) {
+             var txt = typeof ing === "object" ? (ing.amount || "") + " " + (ing.unit || "") + " " + ing.name : String(ing);
+             return '<li class="py-1.5 flex items-center justify-between gap-2 text-xs sm:text-sm"><span>' + escapeHtml(txt.trim()) + "</span></li>";
+           })
+           .join("");
+
+         mainArea.innerHTML =
+           '<div class="bg-surface rounded-2xl p-4 sm:p-6 border border-border shadow-2xs space-y-4">' +
+           '<div class="flex flex-wrap items-start justify-between gap-3">' +
+           "<div>" +
+           '<span class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-terracotta/15 text-terracotta">Jahrgang ' +
+           selectedRecipe.resolvedYear +
+           "</span>" +
+           '<h3 class="font-serif text-xl sm:text-2xl font-bold mt-1">' +
+           escapeHtml(selectedRecipe.title) +
+           "</h3>" +
+           (selectedRecipe.note
+             ? '<p class="text-xs sm:text-sm text-muted italic mt-1">' + escapeHtml(selectedRecipe.note) + "</p>"
+             : "") +
+           "</div>" +
+           '<button type="button" data-action="open-recipe" data-id="' +
+           escapeHtml(selectedRecipe.id) +
+           '" class="px-4 py-2.5 rounded-xl bg-terracotta hover:bg-terracottaDark text-white text-xs sm:text-sm font-semibold cursor-pointer">Rezept & Mengenrechner öffnen</button>' +
+           "</div>" +
+           '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-border">' +
+           "<div>" +
+           '<h4 class="font-serif font-bold text-base mb-2">Zutaten (Basis: ' +
+           escapeHtml(selectedRecipe.servings || 6) +
+           " Stollen)</h4>" +
+           '<ul class="divide-y divide-border/60 bg-cream rounded-xl px-3.5 py-1 border border-border">' +
+           ingsHtml +
+           "</ul>" +
+           "</div>" +
+           '<div class="space-y-2">' +
+           '<h4 class="font-serif font-bold text-base">Zubereitung & Notizen</h4>' +
+           '<p class="text-xs sm:text-sm leading-relaxed bg-cream p-3.5 rounded-xl border border-border whitespace-pre-line">' +
+           escapeHtml(selectedRecipe.instructions || "") +
+           "</p>" +
+           "</div>" +
+           "</div>" +
+           "</div>";
+         return;
+       }
+
+       // Side-by-Side Comparison View
+       var optionsA = stollenList
+         .map(function (s) {
+           return (
+             '<option value="' +
+             s.resolvedYear +
+             '" ' +
+             (s.resolvedYear === state.compareYears[0] ? "selected" : "") +
+             ">" +
+             s.resolvedYear +
+             " – " +
+             escapeHtml(s.title) +
+             "</option>"
+           );
+         })
+         .join("");
+
+       var optionsB = stollenList
+         .map(function (s) {
+           return (
+             '<option value="' +
+             s.resolvedYear +
+             '" ' +
+             (s.resolvedYear === state.compareYears[1] ? "selected" : "") +
+             ">" +
+             s.resolvedYear +
+             " – " +
+             escapeHtml(s.title) +
+             "</option>"
+           );
+         })
+         .join("");
+
+       var recA = stollenList.filter(function (s) {
+         return s.resolvedYear === state.compareYears[0];
+       })[0] || stollenList[0];
+
+       var recB = stollenList.filter(function (s) {
+         return s.resolvedYear === state.compareYears[1];
+       })[0] || stollenList[stollenList.length - 1];
+
+       function buildCompareColumn(rec) {
+         var list = (rec.ingredients || [])
+           .map(function (ing) {
+             var txt = typeof ing === "object" ? (ing.amount || "") + " " + (ing.unit || "") + " " + ing.name : String(ing);
+             return '<li class="py-1.5 text-xs sm:text-sm">' + escapeHtml(txt.trim()) + "</li>";
+           })
+           .join("");
+         return (
+           '<div class="bg-cream rounded-2xl p-4 border border-border space-y-3">' +
+           '<div class="flex items-center justify-between gap-2">' +
+           '<span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-terracotta text-white">' +
+           rec.resolvedYear +
+           "</span>" +
+           '<span class="text-xs text-muted">Basis: ' +
+           escapeHtml(rec.servings || 6) +
+           " Stollen</span>" +
+           "</div>" +
+           '<h4 class="font-serif font-bold text-base sm:text-lg">' +
+           escapeHtml(rec.title) +
+           "</h4>" +
+           '<ul class="divide-y divide-border/70 border-t border-border/70 pt-1">' +
+           list +
+           "</ul>" +
+           "</div>"
+         );
+       }
+
+       mainArea.innerHTML =
+         '<div class="bg-surface rounded-2xl p-4 sm:p-6 border border-border shadow-2xs space-y-4">' +
+         '<h3 class="font-serif text-lg sm:text-xl font-bold">Direkter Jahrgangs-Vergleich</h3>' +
+         '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">' +
+         "<div>" +
+         '<label class="block text-xs font-semibold text-muted mb-1">Jahrgang A</label>' +
+         '<select id="compareSelectA" class="w-full px-3 py-2 rounded-xl bg-cream border border-border text-xs sm:text-sm font-medium">' +
+         optionsA +
+         "</select>" +
+         "</div>" +
+         "<div>" +
+         '<label class="block text-xs font-semibold text-muted mb-1">Jahrgang B</label>' +
+         '<select id="compareSelectB" class="w-full px-3 py-2 rounded-xl bg-cream border border-border text-xs sm:text-sm font-medium">' +
+         optionsB +
+         "</select>" +
+         "</div>" +
+         "</div>" +
+         '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">' +
+         buildCompareColumn(recA) +
+         buildCompareColumn(recB) +
+         "</div>" +
+         "</div>";
+     }
+
+     // Recipe Detail Modal Logic
+     function openDetailModal(recipeId) {
+       var recipe = getRecipeById(recipeId);
+       if (!recipe) return;
+
+       state.activeRecipeId = recipe.id;
+       state.showPhoto = false;
+       if (!state.servingMap[recipe.id]) {
+         state.servingMap[recipe.id] = Number(recipe.servings) || 4;
+       }
+
+       document.getElementById("confirmDeleteBox").classList.add("hidden");
+       document.getElementById("askDeleteBtn").classList.remove("hidden");
+
+       renderDetailModalContent();
+       document.getElementById("detailModal").setAttribute("data-open", "true");
+     }
+
+     function closeDetailModal() {
+       state.activeRecipeId = null;
+       document.getElementById("detailModal").setAttribute("data-open", "false");
+     }
+
+     function renderDetailModalContent() {
+       var recipe = getRecipeById(state.activeRecipeId);
+       if (!recipe) return;
+
+       var stollen = isStollenRecipe(recipe);
+       var yr = extractYear(recipe);
+       var baseServings = Number(recipe.servings) || 4;
+       var currentServings = state.servingMap[recipe.id] || baseServings;
+       var factor = currentServings / baseServings;
+
+       document.getElementById("detailBadge").textContent =
+         stollen && yr ? "Stollen-Archiv · " + yr : recipe.category;
+       document.getElementById("detailTitle").textContent = recipe.title;
+
+       var noteEl = document.getElementById("detailNote");
+       if (recipe.note) {
+         noteEl.textContent = recipe.note;
+         noteEl.classList.remove("hidden");
+       } else {
+         noteEl.classList.add("hidden");
+       }
+
+       // Stollen archive toggle
+       var stollenToggle = document.getElementById("detailStollenToggle");
+       var yearWrap = document.getElementById("detailYearWrap");
+       var yearInput = document.getElementById("detailYearInput");
+       stollenToggle.checked = stollen;
+       if (stollen) {
+         yearWrap.classList.remove("hidden");
+         yearInput.value = yr || "";
+       } else {
+         yearWrap.classList.add("hidden");
+       }
+
+       // Photo handling
+       var togglePhotoBtn = document.getElementById("togglePhotoBtn");
+       var photoPreviewBox = document.getElementById("photoPreviewBox");
+       var photoImg = document.getElementById("detailPhotoImg");
+       if (recipe.photoDataUrl) {
+         togglePhotoBtn.classList.remove("hidden");
+         togglePhotoBtn.textContent = state.showPhoto
+           ? "Originalbild ausblenden"
+           : "Originalbild anzeigen";
+         photoImg.src = recipe.photoDataUrl;
+         photoPreviewBox.classList.toggle("hidden", !state.showPhoto);
+       } else {
+         togglePhotoBtn.classList.add("hidden");
+         photoPreviewBox.classList.add("hidden");
+         photoImg.src = "";
+       }
+
+       // Servings display
+       var unitLabel = stollen ? "Stollen" : "Portionen";
+       document.getElementById("detailBaseHint").textContent =
+         "Basis: " + baseServings + " " + unitLabel;
+       document.getElementById("detailServingsVal").textContent = String(currentServings);
+
+       // Scaled ingredients
+       var listEl = document.getElementById("detailIngredientsList");
+       var ingsHtml = (recipe.ingredients || [])
+         .map(function (rawIng) {
+           var parsed = parseIngredient(rawIng);
+           var scaled = formatScaledAmount(parsed.amount, factor);
+           var amountPart = [scaled, parsed.unit].filter(Boolean).join(" ");
+           return (
+             '<li class="py-2 flex items-baseline justify-between gap-3">' +
+             '<span class="text-espresso">' +
+             escapeHtml(parsed.name) +
+             "</span>" +
+             (amountPart
+               ? '<span class="font-bold text-terracotta whitespace-nowrap">' +
+                 escapeHtml(amountPart) +
+                 "</span>"
+               : "") +
+             "</li>"
+           );
+         })
+         .join("");
+       listEl.innerHTML = ingsHtml;
+
+       document.getElementById("detailInstructions").textContent = recipe.instructions || "";
+     }
+
+     // Add / Import Modal Logic
+     function populateCategoryDropdown() {
+       var sel = document.getElementById("inpCategory");
+       sel.innerHTML = CATEGORIES.map(function (c) {
+         return '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + "</option>";
+       }).join("");
+     }
+
+     function openAddModal(subtab) {
+       populateCategoryDropdown();
+       switchAddSubtab(subtab || "manual");
+       document.getElementById("jsonErrorMsg").classList.add("hidden");
+       document.getElementById("addModal").setAttribute("data-open", "true");
+     }
+
+     function closeAddModal() {
+       document.getElementById("addModal").setAttribute("data-open", "false");
+     }
+
+     function switchAddSubtab(subtab) {
+       var btns = document.querySelectorAll(".subtab-btn");
+       for (var i = 0; i < btns.length; i++) {
+         var b = btns[i];
+         var active = b.getAttribute("data-subtab") === subtab;
+         b.className =
+           "subtab-btn px-3.5 py-2.5 text-xs sm:text-sm cursor-pointer border-b-2 " +
+           (active
+             ? "border-terracotta text-terracotta font-semibold"
+             : "border-transparent text-muted hover:text-espresso font-medium");
+       }
+       document.getElementById("manualForm").classList.toggle("hidden", subtab !== "manual");
+       document.getElementById("jsonPanel").classList.toggle("hidden", subtab !== "json");
+     }
+
+     function renderAll() {
+       updateHeaderBadges();
+       renderTabs();
+       if (state.activeTab === "rezepte") renderRecipesView();
+       if (state.activeTab === "zufall") renderRandomView();
+       if (state.activeTab === "stollen") renderStollenView();
+     }
+
+     // Centralized Event Delegation (Click)
+     document.addEventListener("click", function (e) {
+       var target = e.target.closest("[data-action]");
+       if (!target) return;
+
+       var action = target.getAttribute("data-action");
+
+       if (action === "go-home") {
+         state.activeTab = "rezepte";
+         state.selectedCategory = "Alle";
+         state.searchQuery = "";
+         var sInp = document.getElementById("searchInput");
+         if (sInp) sInp.value = "";
+         renderAll();
+         return;
+       }
+
+       if (action === "switch-tab") {
+         state.activeTab = target.getAttribute("data-tab") || "rezepte";
+         renderAll();
+         return;
+       }
+
+       if (action === "select-category") {
+         state.selectedCategory = target.getAttribute("data-category") || "Alle";
+         renderRecipesView();
+         return;
+       }
+
+       if (action === "clear-search") {
+         state.searchQuery = "";
+         document.getElementById("searchInput").value = "";
+         renderRecipesView();
+         return;
+       }
+
+       if (action === "reset-filters") {
+         state.selectedCategory = "Alle";
+         state.searchQuery = "";
+         document.getElementById("searchInput").value = "";
+         renderRecipesView();
+         return;
+       }
+
+       if (action === "open-recipe") {
+         openDetailModal(target.getAttribute("data-id"));
+         return;
+       }
+
+       if (action === "close-detail-modal") {
+         closeDetailModal();
+         return;
+       }
+
+       if (action === "backdrop-close-detail") {
+         if (e.target === document.getElementById("detailModal")) {
+           closeDetailModal();
+         }
+         return;
+       }
+
+       if (action === "dec-servings") {
+         var rDec = getRecipeById(state.activeRecipeId);
+         if (!rDec) return;
+         var curDec = state.servingMap[rDec.id] || Number(rDec.servings) || 4;
+         if (curDec > 1) {
+           state.servingMap[rDec.id] = curDec - 1;
+           renderDetailModalContent();
+         }
+         return;
+       }
+
+       if (action === "inc-servings") {
+         var rInc = getRecipeById(state.activeRecipeId);
+         if (!rInc) return;
+         var curInc = state.servingMap[rInc.id] || Number(rInc.servings) || 4;
+         if (curInc < 200) {
+           state.servingMap[rInc.id] = curInc + 1;
+           renderDetailModalContent();
+         }
+         return;
+       }
+
+       if (action === "toggle-photo-preview") {
+         state.showPhoto = !state.showPhoto;
+         renderDetailModalContent();
+         return;
+       }
+
+       if (action === "save-detail-year") {
+         var rYr = getRecipeById(state.activeRecipeId);
+         if (!rYr) return;
+         var valYr = parseInt(document.getElementById("detailYearInput").value, 10);
+         rYr.year = isNaN(valYr) ? null : valYr;
+         saveRecipes(state.recipes);
+         renderDetailModalContent();
+         renderAll();
+         showToast("Jahrgang gespeichert.");
+         return;
+       }
+
+       if (action === "ask-delete") {
+         document.getElementById("askDeleteBtn").classList.add("hidden");
+         document.getElementById("confirmDeleteBox").classList.remove("hidden");
+         return;
+       }
+
+       if (action === "confirm-delete-no") {
+         document.getElementById("confirmDeleteBox").classList.add("hidden");
+         document.getElementById("askDeleteBtn").classList.remove("hidden");
+         return;
+       }
+
+       if (action === "confirm-delete-yes") {
+         var delId = state.activeRecipeId;
+         state.recipes = state.recipes.filter(function (r) {
+           return r.id !== delId;
+         });
+         saveRecipes(state.recipes);
+         closeDetailModal();
+         renderAll();
+         showToast("Rezept wurde gelöscht.");
+         return;
+       }
+
+       if (action === "open-add-modal") {
+         openAddModal("manual");
+         return;
+       }
+
+       if (action === "close-add-modal") {
+         closeAddModal();
+         return;
+       }
+
+       if (action === "backdrop-close-add") {
+         if (e.target === document.getElementById("addModal")) {
+           closeAddModal();
+         }
+         return;
+       }
+
+       if (action === "switch-subtab") {
+         switchAddSubtab(target.getAttribute("data-subtab") || "manual");
+         return;
+       }
+
+       if (action === "random-select-all") {
+         state.randomCats = CATEGORIES.slice();
+         renderRandomView();
+         return;
+       }
+
+       if (action === "random-select-none") {
+         state.randomCats = [];
+         renderRandomView();
+         return;
+       }
+
+       if (action === "draw-random") {
+         if (state.randomCats.length === 0) {
+           showToast("Bitte wähle mindestens eine Kategorie aus.");
+           return;
+         }
+         var pool = state.recipes.filter(function (r) {
+           var cat = isStollenRecipe(r) ? "Stollen-Archiv" : r.category;
+           return state.randomCats.indexOf(cat) !== -1;
+         });
+         if (pool.length === 0) {
+           showToast("In den gewählten Kategorien sind noch keine Rezepte.");
+           return;
+         }
+         var pick = pool[Math.floor(Math.random() * pool.length)];
+         state.randomPickId = pick.id;
+         renderRandomView();
+         return;
+       }
+
+       if (action === "toggle-compare") {
+         state.compareMode = !state.compareMode;
+         renderStollenView();
+         return;
+       }
+
+       if (action === "select-stollen-year") {
+         state.compareMode = false;
+         state.selectedStollenYear = Number(target.getAttribute("data-year"));
+         renderStollenView();
+         return;
+       }
+
+       if (action === "export-all-json") {
+         var exportBox = document.getElementById("jsonTextarea");
+         exportBox.value = JSON.stringify(state.recipes, null, 2);
+         exportBox.select();
+         try {
+           document.execCommand("copy");
+           showToast("Alle Rezepte als JSON in die Zwischenablage kopiert!");
+         } catch (err) {
+           showToast("JSON wurde in das Textfeld geladen.");
+         }
+         return;
+       }
+
+       if (action === "import-json") {
+         var rawJson = document.getElementById("jsonTextarea").value.trim();
+         var errBox = document.getElementById("jsonErrorMsg");
+         errBox.classList.add("hidden");
+         if (!rawJson) {
+           errBox.textContent = "Bitte füge zuerst einen JSON-Text ein.";
+           errBox.classList.remove("hidden");
+           return;
+         }
+         try {
+           var parsed = JSON.parse(rawJson);
+           var arr = Array.isArray(parsed) ? parsed : [parsed];
+           var addedCount = 0;
+           for (var k = 0; k < arr.length; k++) {
+             var item = arr[k];
+             if (!item || !item.title) continue;
+             var yrNum = item.year ? Number(item.year) : extractYear(item);
+             var stollenFlag =
+               item.isStollen === true ||
+               item.category === "Stollen-Archiv" ||
+               (yrNum && !isNaN(yrNum)) ||
+               String(item.title).toLowerCase().indexOf("stollen") !== -1;
+             var cleanCat = stollenFlag
+               ? "Stollen-Archiv"
+               : CATEGORIES.indexOf(item.category) !== -1
+               ? item.category
+               : "Kuchen";
+             var cleanIngs = Array.isArray(item.ingredients)
+               ? item.ingredients.map(function (ing) {
+                   if (ing && typeof ing === "object") {
+                     return [ing.amount, ing.unit, ing.name].filter(Boolean).join(" ").trim();
+                   }
+                   return String(ing);
+                 })
+               : [];
+             state.recipes.unshift({
+               id: "rec-" + Date.now() + "-" + k,
+               title: String(item.title).trim(),
+               category: cleanCat,
+               year: yrNum || null,
+               servings: Number(item.servings) || 4,
+               isStollen: stollenFlag,
+               note: item.note ? String(item.note) : "",
+               ingredients: cleanIngs,
+               instructions: String(item.instructions || ""),
+               photoDataUrl: item.photoDataUrl || ""
+             });
+             addedCount++;
+           }
+           saveRecipes(state.recipes);
+           closeAddModal();
+           renderAll();
+           showToast(addedCount + " Rezept(e) erfolgreich importiert!");
+         } catch (parseErr) {
+           errBox.textContent = "Ungültiges JSON-Format: " + parseErr.message;
+           errBox.classList.remove("hidden");
+         }
+         return;
+       }
+     });
+
+     // Delegated Change & Input Events
+     document.addEventListener("change", function (e) {
+       var target = e.target;
+
+       if (target.getAttribute("data-action") === "toggle-random-cat") {
+         var cat = target.getAttribute("data-category");
+         var idx = state.randomCats.indexOf(cat);
+         if (target.checked && idx === -1) state.randomCats.push(cat);
+         if (!target.checked && idx !== -1) state.randomCats.splice(idx, 1);
+         renderRandomView();
+         return;
+       }
+
+       if (target.id === "inpCategory") {
+         document
+           .getElementById("inpYearWrap")
+           .classList.toggle("hidden", target.value !== "Stollen-Archiv");
+         return;
+       }
+
+       if (target.id === "detailStollenToggle") {
+         var rec = getRecipeById(state.activeRecipeId);
+         if (!rec) return;
+         rec.isStollen = target.checked;
+         if (target.checked) {
+           rec.category = "Stollen-Archiv";
+           if (!rec.year) rec.year = extractYear(rec) || 1970;
+         } else {
+           rec.category = "Kuchen";
+         }
+         saveRecipes(state.recipes);
+         renderDetailModalContent();
+         renderAll();
+         return;
+       }
+
+       if (target.id === "compareSelectA") {
+         state.compareYears[0] = Number(target.value);
+         renderStollenView();
+         return;
+       }
+
+       if (target.id === "compareSelectB") {
+         state.compareYears[1] = Number(target.value);
+         renderStollenView();
+         return;
+       }
+
+       if (target.id === "photoUploadInput") {
+         var file = target.files && target.files[0];
+         var activeRec = getRecipeById(state.activeRecipeId);
+         if (!file || !activeRec) return;
+
+         var reader = new FileReader();
+         reader.onload = function (ev) {
+           var img = new Image();
+           img.onload = function () {
+             // Compress image slightly for smooth mobile storage
+             var maxDim = 1000;
+             var w = img.width;
+             var h = img.height;
+             if (w > maxDim || h > maxDim) {
+               if (w > h) {
+                 h = Math.round((h * maxDim) / w);
+                 w = maxDim;
+               } else {
+                 w = Math.round((w * maxDim) / h);
+                 h = maxDim;
+               }
+             }
+             var canvas = document.createElement("canvas");
+             canvas.width = w;
+             canvas.height = h;
+             var ctx = canvas.getContext("2d");
+             ctx.drawImage(img, 0, 0, w, h);
+             activeRec.photoDataUrl = canvas.toDataURL("image/jpeg", 0.78);
+             state.showPhoto = true;
+             saveRecipes(state.recipes);
+             renderDetailModalContent();
+             renderAll();
+             showToast("Originalfoto angehängt!");
+           };
+           img.src = ev.target.result;
+         };
+         reader.readAsDataURL(file);
+         target.value = "";
+       }
+     });
+
+     document.getElementById("searchInput").addEventListener("input", function (e) {
+       state.searchQuery = e.target.value;
+       renderRecipesView();
+     });
+
+     document.getElementById("manualForm").addEventListener("submit", function (e) {
+       e.preventDefault();
+       var title = document.getElementById("inpTitle").value.trim();
+       var category = document.getElementById("inpCategory").value;
+       var servings = Number(document.getElementById("inpServings").value) || 4;
+       var yearVal = parseInt(document.getElementById("inpYear").value, 10);
+       var note = document.getElementById("inpNote").value.trim();
+       var ingLines = document
+         .getElementById("inpIngredients")
+         .value.split("\n")
+         .map(function (l) {
+           return l.trim();
+         })
+         .filter(Boolean);
+       var instructions = document.getElementById("inpInstructions").value.trim();
+
+       if (!title || ingLines.length === 0) return;
+
+       var isStollen = category === "Stollen-Archiv";
+       state.recipes.unshift({
+         id: "rec-" + Date.now(),
+         title: title,
+         category: category,
+         year: isStollen && !isNaN(yearVal) ? yearVal : null,
+         servings: servings,
+         isStollen: isStollen,
+         note: note,
+         ingredients: ingLines,
+         instructions: instructions
+       });
+
+       saveRecipes(state.recipes);
+       document.getElementById("manualForm").reset();
+       closeAddModal();
+       renderAll();
+       showToast("Rezept „" + title + "“ gespeichert!");
+     });
+
+     // Boot immediately
+     renderAll();
+   })();
+ </script>
+</body>
+</html>
