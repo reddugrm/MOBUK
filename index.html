@@ -707,14 +707,14 @@
      saveRecipes(state.recipes);
 
      // Utility functions
-     function escapeHtml(str) {
+          function escapeHtml(str) {
        return String(str || "")
-         .replace(/&/g, "&")
-         .replace(/</g, "<")
-         .replace(/>/g, ">")
-         .replace(/"/g, """)
-         .replace(/'/g, "'");
-     }
+         .replaceAll("&", "&amp;")
+         .replaceAll("<", "&lt;")
+         .replaceAll(">", "&gt;")
+         .replaceAll('"', "&quot;")
+         .replaceAll("'", "&#39;");
+          }
 
      var toastTimer = null;
      function showToast(msg) {
